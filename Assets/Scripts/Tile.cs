@@ -2,41 +2,36 @@
 using System.Collections;
 
 public class Tile : MonoBehaviour {
-    public bool Broken = false;
-    public bool Free = true;
-	// Use this for initialization
+    // Use this for initialization
+    SpriteRenderer sprite;
 	void Start () {
-	
+        sprite = this.GetComponent<SpriteRenderer>();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	if(Broken)
-        {
-            this.GetComponent<SpriteRenderer>().color = Color.red;
-        }
-    else if(!Broken && Free)
-        {
-            this.GetComponent<SpriteRenderer>().color = Color.green;
-        }
-    else if(!Free && !Broken)
-        {
-            this.GetComponent<SpriteRenderer>().color = Color.yellow;
-        }
-	}
+	public enum States {Free,Used,Pending,Broken,Wall};
 
-    public void Break()
+    public States State { get; set; }
+    // Update is called once per frame
+    void Update()
     {
-        Broken = true;
-        Free = false;
-    }
-    public void Fill()
-    {
-        Free = false;
-    }
-    public void MakeFree()
-    {
-        Free = true;
-        Broken = false;
+        if (State == States.Wall)
+        {
+            sprite.color = Color.blue;
+        }
+        else if(State==States.Broken)
+        {
+            sprite.color = Color.black;
+        }
+        else if(State==States.Used)
+        {
+            sprite.color = Color.yellow;
+        }
+        else if(State==States.Pending)
+        {
+            sprite.color = Color.magenta;
+        }
+        else
+        {
+            sprite.color = Color.green;
+        }
     }
 }

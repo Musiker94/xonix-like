@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Hero : MonoBehaviour
 {
     public float tileSize = 1;
+    public float p, p1, p2;
     private Map Map = null; GameObject prevtile = null;
     private int used = 0;
     // Use this for initialization
@@ -12,45 +14,44 @@ public class Hero : MonoBehaviour
         Map = GameObject.Find("Map").GetComponent<Map>();
     }
 
-    // Update is called once per frame
     void Update()
-    {
-
-    }
-
-    void FixedUpdate()
     {
         Vector3 move = new Vector3(0, 0, 0);
         if (Input.GetKey(KeyCode.LeftArrow))
-            move = new Vector3(-1, 0, 0) * tileSize;
+            move = new Vector3(-1, 0, 0);
         else if (Input.GetKey(KeyCode.RightArrow))
-            move = new Vector3(1, 0, 0) * tileSize;
+            move = new Vector3(1, 0, 0);
         else if (Input.GetKey(KeyCode.UpArrow))
-            move = new Vector3(0, 1, 0) * tileSize;
+            move = new Vector3(0, 1, 0);
         else if (Input.GetKey(KeyCode.DownArrow))
-            move = new Vector3(0, -1, 0) * tileSize;
-        if (move != new Vector3(0, 0, 0))
+            move = new Vector3(0, -1, 0);
+        p = (int)(transform.position.x);
+        p1 = (transform.position.x);
+        var tile = Map.Nodes[(int)(transform.position.x), (int)(transform.position.y)];
+        var newpos = this.transform.position + move;
+        if ((int)(newpos.x) < Map.xTiles - 1 && (int)(newpos.y) < Map.yTiles - 1 && (int)(newpos.x) >= 0 && (int)(newpos.y) >= 0)
         {
-            var tile = Map.Grid[(int)transform.position.x, (int)transform.position.y];
-            var newpos = this.transform.position + move;
-            var newtile = Map.Grid[(int)newpos.x, (int)newpos.y];
-            if ((Vector2)this.transform.position * tileSize == (Vector2)tile.transform.position && tile != prevtile)
+            var newtile = Map.Nodes[(int)(newpos.x), (int)(newpos.y)];
+            if (newtile != null)
             {
-                tile.GetComponent<Tile>().State = Tile.States.Used;
-                prevtile = tile;
-                used++;
+                if (new Vector2((int)(transform.position.x), (int)(transform.position.y)) == new Vector2((int)(tile.transform.position.x), (int)(tile.transform.position.y)) && tile != prevtile)
+                {
+                    tile.GetComponent<Node>().State = Node.States.Used;
+                    prevtile = tile;
+                    used++;
+                }
+                if (newtile.GetComponent<Node>().State == Node.States.Free)
+                {
+                    this.transform.position = Vector3.MoveTowards(transform.position, transform.position + move, 1);
+                }
+                else if (used > 0 && (newtile.GetComponent<Node>().State == Node.States.Wall || newtile.GetComponent<Node>().State == Node.States.Broken))
+                {
+                    Map.Ebosh();
+                    used = 0;
+                    Map.Clear();
+                }
             }
-            if (newtile.GetComponent<Tile>().State == Tile.States.Free)
-            {
-                this.transform.position += move;
-            }
-            else if (used > 0 && (newtile.GetComponent<Tile>().State == Tile.States.Wall || newtile.GetComponent<Tile>().State == Tile.States.Broken))
-            {
-                Map.Ebosh();
-                used = 0;
-                Map.Clear();
-            }
-        }
 
+        }
     }
 }
